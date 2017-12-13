@@ -1,4 +1,5 @@
-# MOB Expansion 2016615
+/*
+ MOB Expansion 2016615
   Board:  ArduinoR3
   Lighting:
 
@@ -30,7 +31,7 @@ D13 Free
   3. Touch tray through hole, screen light goes green, stylus light goes red. next vile lights green. Repeat three times (touching all three vials).
   4. Once all wells filled, button light turns on.  Push button to initiate sequence - can see it in tray.
   5. Screen now tells you results, including bar graph.
-#
+*/
 
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
