@@ -4,9 +4,26 @@
 
     Test Tubes:       3@  https://www.adafruit.com/product/2226
     DNA Sample Tray:  3@  https://www.adafruit.com/product/1426
-    Pipette:          6@  https://www.adafruit.com/product/1938 
+    Pipette:          6@  https://www.adafruit.com/product/1938
+    Pipette Switch:   1@  https://www.mouser.com/ProductDetail/CK-Components/PNP8E3D2Y03QE/?qs=%2fha2pyFadugSqn7RireNfLBzy61sQP%2fFy5X2XMWh5YRy%2fMPDqMplag%3d%3d
+    Monitor Switch:   1@  https://www.mouser.com/ProductDetail/CK-Components/AP4D202TZBE/?qs=%2fha2pyFaduiTlLh%252b9I2UnqgY%2fR780juLpEHFjth5Whnd3I5fQOksOA%3d%3d
 
+Pin Assignments:
 
+D0  RX
+D1  TX
+D2  Free
+D3  Test Tube LH (1) Switch
+D4  Test Tube MID (2) Switch
+D5  Test Tube RH (3) Switch
+D6  DNA Receiver Tray LH (1) Switch
+D7  DNA Receiver Tray MID (2) Switch
+D8  DNA Receiver Tray RH (3) Switch
+D9  Pipette lights
+D10 Test Tube lights
+D11 DNA Receiver Tray Lights
+D12 DNA Receiver Tray Lighted Button
+D13 Free
 
   1.	Screen tells you what to do to start, Pipette lights red and first vial lights green.
   2. Touch stylus to vial while holding button, stylus tip goes from red light to green. vile light turns red.
