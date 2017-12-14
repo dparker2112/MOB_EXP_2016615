@@ -38,7 +38,32 @@ D13 Free
   #include <avr/power.h>
 #endif
 
-#define PIN 3
+#define PIP_PIN 9       //Pipette Lights
+#define TT_PIN 10       //Test Tube Lights
+#define TRAY_PIN 11     //DNA Tray Lights
+
+int pp;
+int tt;
+int tl;
+int read_tt1;
+int read_tt2;
+int read_tt3;
+int read_tr1;
+int read_tr2;
+int read_tr3;
+int previous = LOW;    // the previous reading from the input pin
+int state = HIGH;      // the current state of the output pin
+int tt1sw = 3;
+int tt2sw = 4;
+int tt3sw = 5;
+int tr1sw = 6;
+int tr2sw = 7;
+int tr3sw = 8;
+
+// the following variables are long's because the time, measured in milliseconds,
+// will quickly become a bigger number than can be stored in an int.
+long time = 0;         // the last time the output pin was toggled
+long debounce = 200;   // the debounce time, increase if the output flickers
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = Arduino pin number (most are valid)
@@ -48,7 +73,9 @@ D13 Free
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(6, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel PipLites = Adafruit_NeoPixel(6, PIP_PIN, NEO_RGB + NEO_KHZ800);
+Adafruit_NeoPixel TTLites = Adafruit_NeoPixel(21, TT_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel TrayLites = Adafruit_NeoPixel(24, TRAY_PIN, NEO_GRB + NEO_KHZ800);
 
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
@@ -63,107 +90,45 @@ void setup() {
   // End of trinket special code
 
 
-  strip.begin();
-  strip.show(); // Initialize all pixels to 'off'
+  PipLites.begin();
+  PipLites.show(); // Initialize all pixels to 'off'
+  TTLites.begin();
+  TTLites.show(); // Initialize all pixels to 'off'
+  TrayLites.begin();
+  TrayLites.show(); // Initialize all pixels to 'off'
+
 }
+
 
 void loop() {
-  // Some example procedures showing how to display to the pixels:
-  colorWipe(strip.Color(255, 0, 0), 50); // Red
-  colorWipe(strip.Color(0, 255, 0), 50); // Green
-  colorWipe(strip.Color(0, 0, 255), 50); // Blue
-//colorWipe(strip.Color(0, 0, 0, 255), 50); // White RGBW
-  // Send a theater pixel chase in...
-  theaterChase(strip.Color(127, 127, 127), 50); // White
-  theaterChase(strip.Color(127, 0, 0), 50); // Red
-  theaterChase(strip.Color(0, 0, 127), 50); // Blue
-
-  rainbow(20);
-  rainbowCycle(20);
-  theaterChaseRainbow(50);
-}
-
-// Fill the dots one after the other with a color
-void colorWipe(uint32_t c, uint8_t wait) {
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, c);
-    strip.show();
-    delay(wait);
+  for(int tt=15; tt<21; tt++){
+  TTLites.setPixelColor(tt, 0, 255, 0);       //Test Tube 1 GREEN
+  TTLites.show();
   }
-}
-
-void rainbow(uint8_t wait) {
-  uint16_t i, j;
-
-  for(j=0; j<256; j++) {
-    for(i=0; i<strip.numPixels(); i++) {
-      strip.setPixelColor(i, Wheel((i+j) & 255));
-    }
-    strip.show();
-    delay(wait);
+  for(int pp=0; pp<5; pp++){
+  PipLites.setPixelColor(pp, 255, 0, 0);      //Pipette RED
+  PipLites.show();
   }
-}
 
-// Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(uint8_t wait) {
-  uint16_t i, j;
+  read_tt1 = digitalRead(tt1sw);
 
-  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-    for(i=0; i< strip.numPixels(); i++) {
-      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
-    }
-    strip.show();
-    delay(wait);
+  // if the input just went from LOW and HIGH and we've waited long enough
+  // to ignore any noise on the circuit, toggle the output pin and remember
+  // the time
+  if (read_tt1 == HIGH && previous == LOW && millis() - time > debounce) {
+    if (state == HIGH)
+      state = LOW;
+    else
+      state = HIGH;
+
+    time = millis();
   }
-}
 
-//Theatre-style crawling lights.
-void theaterChase(uint32_t c, uint8_t wait) {
-  for (int j=0; j<10; j++) {  //do 10 cycles of chasing
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(i+q, c);    //turn every third pixel on
-      }
-      strip.show();
-
-      delay(wait);
-
-      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(i+q, 0);        //turn every third pixel off
-      }
-    }
+  TTLites.show(); // Initialize all pixels to 'off'
+  
+  for(int pp=0; pp<5; pp++){
+  PipLites.setPixelColor(pp, 255, 0, 0);      //Pipette RED
+  PipLites.show();
   }
-}
 
-//Theatre-style crawling lights with rainbow effect
-void theaterChaseRainbow(uint8_t wait) {
-  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
-      }
-      strip.show();
-
-      delay(wait);
-
-      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(i+q, 0);        //turn every third pixel off
-      }
-    }
-  }
-}
-
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
-    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if(WheelPos < 170) {
-    WheelPos -= 85;
-    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
