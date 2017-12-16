@@ -88,7 +88,7 @@ void setup() {
     //if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
   //#endif
   // End of trinket special code
-
+  pinMode(tt1sw, INPUT_PULLUP);
 
   PipLites.begin();
   PipLites.show(); // Initialize all pixels to 'off'
@@ -112,23 +112,17 @@ void loop() {
 
   read_tt1 = digitalRead(tt1sw);
 
-  // if the input just went from LOW and HIGH and we've waited long enough
-  // to ignore any noise on the circuit, toggle the output pin and remember
-  // the time
-  if (read_tt1 == HIGH && previous == LOW && millis() - time > debounce) {
-    if (state == HIGH)
-      state = LOW;
-    else
-      state = HIGH;
+  if (read_tt1 == HIGH){
 
-    time = millis();
-  }
+    for(int tt=15; tt<21; tt++){
+    TTLites.setPixelColor(tt, 0, 0, 0);
+    TTLites.show();                             // Initialize all pixels to 'off'
+    }
+    for(int pp=0; pp<5; pp++){
+    PipLites.setPixelColor(pp, 0, 255, 0);      //Pipette GREEN
+    PipLites.show();
+    }
+    }
 
-  TTLites.show(); // Initialize all pixels to 'off'
-  
-  for(int pp=0; pp<5; pp++){
-  PipLites.setPixelColor(pp, 255, 0, 0);      //Pipette RED
-  PipLites.show();
-  }
 
 }
