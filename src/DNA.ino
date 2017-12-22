@@ -10,7 +10,7 @@
 Pin Assignments:
 D0  RX
 D1  TX
-D2  DNA tray pushbutton LED : HIGH is yellow, LOW is red
+D2  Free
 D3  Test Tube LH (1) Switch
 D4  Test Tube MID (2) Switch
 D5  Test Tube RH (3) Switch
@@ -21,7 +21,7 @@ D9  Pipette lights
 D10 Test Tube lights
 D11 DNA Receiver Tray Lights
 D12 DNA Receiver Tray Lighted Button
-D13 DNA tray pushbutton LED : HIGH is red, LOW is yellow
+D13 Free
   1.	Screen tells you what to do to start, Pipette lights red and first vial lights green.
   2. Touch stylus to vial while holding button, stylus tip goes from red light to green. vile light turns red.
   3. Touch tray through hole, screen light goes green, stylus light goes red. next vile lights green. Repeat three times (touching all three vials).
@@ -42,9 +42,20 @@ int dir=1;
 int set=3;
 int notify=1;
 
+int LEDlightlogic[3][2]={{0,0},
+                         {0,1},  //*added for Button LED control 1/4
+                         {1,0}}; // this is the logic of each state of the LED
+
 #define TimeOutInSecs 20
 
 void setup() {
+
+  pinMode(2,OUTPUT);  //*added for Button LED control 2/4
+  pinMode(13,OUTPUT); // These turn the pins that control the LEDs in to outputs.
+
+  buttonLED(1);      //*added for Button LED control 3/4
+                     // This uses the subroutine to turn the LED red
+
   Serial.begin(9600);
   pipette.begin();  // 6 neodots
   pipette.show();
@@ -145,7 +156,10 @@ void loop(){
   }
 }
 
-
+void buttonLED(int statez){  //*added for Button LED control 4/4
+  digitalWrite(2,LEDlightlogic[statez][0]);
+  digitalWrite(13,LEDlightlogic[statez][1]);
+}
 
 boolean timer(){
   boolean timez=(timeout+(TimeOutInSecs*1000))<millis();
