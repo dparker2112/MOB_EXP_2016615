@@ -30,157 +30,103 @@ D13 Free
 */
 
 #include <Adafruit_NeoPixel.h>
-
-Adafruit_NeoPixel pipette = Adafruit_NeoPixel(1, 9, NEO_RGB + NEO_KHZ800);
-Adafruit_NeoPixel vial = Adafruit_NeoPixel(3, 10, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel DNA = Adafruit_NeoPixel(3, 11, NEO_GRB + NEO_KHZ800);
-
+// Uduino Default Board
+#include<Uduino.h>
+Uduino uduino("uduinoBoard"); // Declare and name your object
+Adafruit_NeoPixel pipette = Adafruit_NeoPixel(6, 9, NEO_RGB + NEO_KHZ800);
+Adafruit_NeoPixel tube = Adafruit_NeoPixel(21, 10, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel dna = Adafruit_NeoPixel(24, 11, NEO_GRB + NEO_KHZ800);
 int rxpins[7]={3,4,5,6,7,8,12};
-long unsigned timeout;
-int fader;
-int dir=1;
-int set=3;
-int notify=1;
-
-int LEDlightlogic[3][2]={{0,0},
-                         {0,1},  //*added for Button LED control 1/4
-                         {1,0}}; // this is the logic of each state of the LED
-
-#define TimeOutInSecs 20
-
-void setup() {
-
-  pinMode(2,OUTPUT);  //*added for Button LED control 2/4
-  pinMode(13,OUTPUT); // These turn the pins that control the LEDs in to outputs.
-
-  buttonLED(1);      //*added for Button LED control 3/4
-                     // This uses the subroutine to turn the LED red
-
-  Serial.begin(9600);
-  pipette.begin();  // 6 neodots
-  pipette.show();
-  vial.begin();  // 3 neosticks(8)
-  vial.show();
-  DNA.begin();     // 3 jewels (7)
-  DNA.show();
-  for(int a=0;a<7;a++){
-    pinMode(rxpins[a],INPUT_PULLUP);
-  }
+int buttonState = -1;
+int prevButtonState = -1;
+void setup()
+{
+Serial.begin(9600);
+while(!Serial);
+uduino.addCommand("SetPipette", SetPipette);
+uduino.addCommand("SetDNA", SetDNA);
+uduino.addCommand("SetTube", SetTube);
+uduino.addCommand("GetContacts", GetContacts);
+pipette.begin(); // 6 neodots
+pipette.show();
+tube.begin(); // 3 neosticks(7)
+tube.show();
+dna.begin(); // 3 jewels (8)
+dna.show();
+for(int a=0;a<7;a++){
+pinMode(rxpins[a],INPUT_PULLUP);
 }
-
-void loop(){
-
-  while(Serial.available()>0){
-    Serial.print(Serial.read());  // empty serial buffer
-  }
-  timeout=millis();  // set the "inactivity timer"
-
-  while((!timer||set==3)&&!Serial.available()>0){ // wait for any serial data
-    fader+=dir;
-    if(fader>=255){dir=-1;}
-    if(fader<=0){dir=1;}
-    for(int a=0;a<6;a++){
-      pipette.setPixelColor(a,fader,fader,fader);  // this pulses the pipette white,, sorta saying come play with me
-    }
-    if(notify){   // this is so it only says waiting once
-      Serial.println("Waiting for input");
-      notify=0;
-    }
-  }
-  delay(200);
-  while(Serial.available()>0){
-    Serial.print(Serial.read()); // empties the serial buffer
-  }
-  Serial.println("");
-  Serial.println("Starting");
-  if(!notify){
-    notify=1;  // resets the notify variable
-    set=0;     //starts the program at vial LH "0"
-  }
-  Serial.print("set: ");
-  Serial.println(set);
-
-
-
-  for(int a=0;a<256;a++){
-    setpipette(a,0,0);  //fades the pipette from off to red
-    setvial(set,0,a,0); //fades the current vial from off to green
-    delay(4);
-  }
-  timeout=millis();    // resets the timout counter
-  fader=127;
-  Serial.println("waiting for vial touch");
-  while(timer&&digitalRead(rxpins[set])){   //waits until you touch the right vial
-    setvial(set,0,fader,0);
-    delay(4);
-    fader++;
-    if(fader>=255){fader=160;}
-  }
-  Serial.print("vial ");
-  Serial.print(set);
-  Serial.println(" touched");
-
-  for(int a=0;a<256;a++){
-    setpipette(255-a,a,0);  //fades the pipette to green
-    setvial(set,0,255-a,0); //fades the vial off
-    delay(4);
-  }
-  timeout=millis();
-  fader=0;
-  Serial.println("waiting for DNA touch");
-  while(timer&&digitalRead(rxpins[set+3])){  //waits for you to touch the right DNA tray
-    setDNA(set,fader,0,0);  //fades the DNA tray to red then pulses it
-    delay(4);
-    fader++;
-    if(fader>=255){fader=160;}
-  }
-  for(int a=0;a<256;a++){
-    setpipette(0,255-a,0);  //fades the pipette off
-    setDNA(set,255-a,a,0);  //fades the DNA tray from red to green
-    delay(4);
-  }
-
-  Serial.print("set ");
-  Serial.print(set);
-  Serial.println(" complete");
-  set++;                  //goes to next set off DNA/vials
-  if(set==3){
-    Serial.println("All complete");
-    Serial.println("Now restarting in 8 seconds");
-    for(int a=0;a<256;a++){
-      for(int b=0;b<3;b++){
-        setDNA(b,0,255-a,0);
-      }
-      delay(28);
-    }
-  }
 }
+void GetContacts()
+{
+buttonState = -1;
+for(int i = 0 ; i < 7; i++)
+{
+if(!digitalRead(rxpins[i]))
+{
+buttonState = i;
+}
+}
+Serial.println(buttonState);
+}
+void loop()
+{ 
+uduino.readSerial();
+delay(15);
+}
+void SetPipette(){ 
+char *arg;
 
-void buttonLED(int statez){  //*added for Button LED control 4/4
-  digitalWrite(2,LEDlightlogic[statez][0]);
-  digitalWrite(13,LEDlightlogic[statez][1]);
-}
+arg = uduino.next();
+int led = atoi(arg);
+arg = uduino.next();
+int r = atoi(arg);
 
-boolean timer(){
-  boolean timez=(timeout+(TimeOutInSecs*1000))<millis();
-  return(timez);
-}
+arg = uduino.next();
+int g = atoi(arg);
 
-void setpipette(byte rz, byte gz, byte bz){
-  for(int a=0;a<6;a++){
-    pipette.setPixelColor(a,rz,gz,bz);
-  }
-  pipette.show();
+arg = uduino.next();
+int b = atoi(arg);
+pipette.setPixelColor(led, r, g, b);
+pipette.show();
 }
-void setDNA(byte poz, byte rz, byte gz, byte bz){
-  for(int a=0;a<7;a++){
-    DNA.setPixelColor((poz*7)+a,rz,gz,bz);
-  }
-  DNA.show();
+void SetDNA(){
+char *arg;
+
+arg = uduino.next();
+int led = atoi(arg);
+arg = uduino.next();
+int r = atoi(arg);
+arg = uduino.next();
+int g = atoi(arg);
+arg = uduino.next();
+int b = atoi(arg);
+
+dna.setPixelColor(led, r, g, b);
+dna.show();
 }
-void setvial(byte poz, byte rz, byte gz, byte bz){
-  for(int a=0;a<8;a++){
-    vial.setPixelColor((poz*8)+a,rz,gz,bz);
-  }
-  vial.show();
+void SetTube(){
+char *arg;
+
+arg = uduino.next();
+int led = atoi(arg);
+arg = uduino.next();
+int r = atoi(arg);
+arg = uduino.next();
+int g = atoi(arg);
+arg = uduino.next();
+int b = atoi(arg);
+
+tube.setPixelColor(led, r, g, b);
+tube.show();
+}
+void printValue(int pin, int value, bool isBundle) {
+Serial.print(pin);
+Serial.print(" ");
+if (isBundle) {
+Serial.print(value);
+Serial.print("-");
+} else {
+Serial.println(value);
+}
 }
