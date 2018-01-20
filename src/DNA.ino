@@ -36,7 +36,7 @@ Uduino uduino("uduinoBoard"); // Declare and name your object
 Adafruit_NeoPixel pipette = Adafruit_NeoPixel(6, 9, NEO_RGB + NEO_KHZ800);
 Adafruit_NeoPixel tube = Adafruit_NeoPixel(21, 10, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel dna = Adafruit_NeoPixel(24, 11, NEO_GRB + NEO_KHZ800);
-int rxpins[7]={3,4,5,6,7,8,12};
+int rxpins[7]={6,7,8,3,4,5,12};
 int buttonState = -1;
 int prevButtonState = -1;
 void setup()
@@ -70,11 +70,11 @@ buttonState = i;
 Serial.println(buttonState);
 }
 void loop()
-{ 
+{
 uduino.readSerial();
 delay(15);
 }
-void SetPipette(){ 
+void SetPipette(){
 char *arg;
 
 arg = uduino.next();
