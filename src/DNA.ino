@@ -60,14 +60,13 @@ pinMode(rxpins[a],INPUT_PULLUP);
 void GetContacts()
 {
 buttonState = -1;
-for(int i = 6 ; i >= 0; i--)
-  {
-    if(!digitalRead(rxpins[i]))
-    {
-      buttonState = i;
-    }
-  }
-
+for(int i = 0 ; i < 7; i++)
+{
+if(!digitalRead(rxpins[i]))
+{
+buttonState = i;
+}
+}
 Serial.println(buttonState);
 }
 void loop()
