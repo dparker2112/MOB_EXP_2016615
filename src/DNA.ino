@@ -10,7 +10,7 @@
 Pin Assignments:
 D0  RX
 D1  TX
-D2  Free
+D2  DNA Receiver Tray Lighted Push Button Bicolor LED : LOW for red, HIGH for yellow
 D3  Test Tube LH (1) Switch
 D4  Test Tube MID (2) Switch
 D5  Test Tube RH (3) Switch
@@ -20,8 +20,8 @@ D8  DNA Receiver Tray RH (3) Switch
 D9  Pipette lights
 D10 Test Tube lights
 D11 DNA Receiver Tray Lights
-D12 DNA Receiver Tray Lighted Button
-D13 Free
+D12 DNA Receiver Tray Lighted Push Button Switch
+D13 DNA Receiver Tray Lighted Push Button Bicolor LED : LOW for yellow, HIGH for red
   1.	Screen tells you what to do to start, Pipette lights red and first vial lights green.
   2. Touch stylus to vial while holding button, stylus tip goes from red light to green. vile light turns red.
   3. Touch tray through hole, screen light goes green, stylus light goes red. next vile lights green. Repeat three times (touching all three vials).
